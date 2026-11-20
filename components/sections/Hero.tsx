@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
@@ -248,7 +248,7 @@ export default function Hero() {
     <section id="home" aria-label="Introduction" className="p-2 sm:p-3">
       <div
         ref={cardRef}
-        className="relative flex min-h-[46rem] flex-col items-center overflow-hidden rounded-t-[1.75rem] rounded-b-[2.75rem] bg-paper text-ink sm:min-h-[48rem] sm:rounded-t-[2.5rem] sm:rounded-b-[3.5rem] md:min-h-[52rem] lg:min-h-[max(46rem,calc(100svh_-_1.5rem))] lg:rounded-b-[4.5rem]"
+        className="relative flex min-h-[46rem] flex-col items-center overflow-hidden rounded-t-[1.75rem] rounded-b-[2.75rem] bg-paper text-ink sm:min-h-[48rem] sm:rounded-t-[2.5rem] sm:rounded-b-[3.5rem] md:min-h-[52rem] lg:min-h-[max(48rem,calc(100svh_-_1.5rem))] lg:rounded-b-[4.5rem]"
       >
         {/* Decorations on the white card */}
         <span
@@ -265,45 +265,44 @@ export default function Hero() {
         </span>
 
         {/* Headline */}
-        <h1 className="relative z-10 px-5 pt-28 text-center text-[clamp(2.5rem,6.6vw,5.5rem)] font-semibold leading-[1.02] tracking-tight lg:px-10">
+        <h1 className="relative z-10 px-5 pt-28 text-center text-[clamp(2.5rem,6.6vw,5.5rem)] font-semibold leading-[1.02] tracking-tight [word-spacing:0.08em] lg:px-10">
           {HEADLINE.map((item, i) =>
             "br" in item ? (
               <br key={i} className="hidden sm:block" />
             ) : (
-              <span
-                key={i}
-                className="-mb-[0.14em] inline-block overflow-hidden pb-[0.14em] align-top"
-              >
-                <span
-                  data-word
-                  className={`invisible relative isolate inline-block ${
-                    item.marker ? "px-[0.12em]" : ""
-                  }`}
-                >
-                  {item.marker && (
-                    <span
-                      data-marker
-                      aria-hidden="true"
-                      className="absolute inset-x-0 inset-y-[0.05em] -z-10 rounded-[0.18em] bg-volt"
-                    />
-                  )}
-                  {item.text}
+              <Fragment key={i}>
+                <span className="-mb-[0.14em] inline-block overflow-hidden pb-[0.14em] align-top">
+                  <span
+                    data-word
+                    className={`invisible relative isolate inline-block ${
+                      item.marker ? "px-[0.12em]" : ""
+                    }`}
+                  >
+                    {item.marker && (
+                      <span
+                        data-marker
+                        aria-hidden="true"
+                        className="absolute inset-x-0 inset-y-[0.05em] -z-10 rounded-[0.18em] bg-volt"
+                      />
+                    )}
+                    {item.text}
+                  </span>
                 </span>{" "}
-              </span>
+              </Fragment>
             )
           )}
         </h1>
 
         <p
           data-fade
-          className="invisible relative z-10 mx-auto mt-5 max-w-xs px-5 text-center text-sm leading-relaxed text-ink/70 lg:absolute lg:left-[6%] lg:top-[50%] lg:m-0 lg:max-w-[16rem] lg:px-0 lg:text-left"
+          className="invisible relative z-10 mx-auto mt-5 max-w-xs px-5 text-center text-sm leading-relaxed text-ink/70 lg:absolute lg:left-[6%] lg:top-[50%] lg:m-0 lg:max-w-[14rem] lg:px-0 lg:text-left xl:max-w-[16rem]"
         >
           I create visual experiences through graphic design, motion and video —
           helping brands communicate, connect and stand out.
         </p>
 
         {/* Avatar on a black circle, anchored to the bottom of the card */}
-        <div className="absolute inset-x-0 bottom-0 mx-auto w-[20rem] sm:w-[24rem] md:w-[26rem] lg:w-[clamp(18rem,calc(100svh_-_24rem),38rem)]">
+        <div className="absolute inset-x-0 bottom-0 mx-auto w-[20rem] sm:w-[24rem] md:w-[26rem] lg:w-[clamp(20rem,calc((max(48rem,100svh_-_1.5rem)_-_21.5rem)_/_1.14),40rem)]">
           <div
             data-circle
             className="invisible absolute -top-[14%] left-1/2 -ml-[53.5%] aspect-square w-[107%] rounded-full bg-ink"
@@ -325,7 +324,7 @@ export default function Hero() {
               alt="Kinwise, an illustrated self-portrait in a green hoodie marked Ps and Ae"
               width={1024}
               height={1024}
-              sizes="(min-width: 1024px) 38rem, (min-width: 768px) 26rem, 20rem"
+              sizes="(min-width: 1024px) 40rem, (min-width: 768px) 26rem, 20rem"
               className="block h-auto w-full"
               priority
             />
