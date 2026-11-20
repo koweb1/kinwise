@@ -1,16 +1,11 @@
 import Hero from "@/components/sections/Hero";
+import About from "@/components/sections/About";
 
 export default function Home() {
   return (
     <>
       <Hero />
-
-      <section
-        id="about"
-        className="flex min-h-screen items-center justify-center px-6 text-2xl text-white/70"
-      >
-        About placeholder
-      </section>
+      <About />
 
       <section
         id="services"
