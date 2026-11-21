@@ -10,11 +10,13 @@ import {
   GraphicScene,
   MotionScene,
   VideoScene,
+  K_FRACTIONS,
+  NIB_REST,
 } from "@/components/ui/ServiceScenes";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type AmbientKind = "float" | "ball" | "playhead";
+type AmbientKind = "nib" | "ball" | "playhead";
 
 type Service = {
   id: string;
@@ -44,7 +46,7 @@ const SERVICES: Service[] = [
     number: "01",
     title: "Graphic Design",
     description: "Visuals that communicate your brand’s message with clarity and style.",
-    ambient: "float",
+    ambient: "nib",
     Scene: GraphicScene,
   },
   {
@@ -80,8 +82,93 @@ const MARQUEE = [
 const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-volt";
 
+// Graphic design: the pen glides to the start, draws the K anchor by anchor,
+// the K fills, the selection box appears and the pen rests to the side
+function buildPenIntro(card: HTMLElement) {
+  const sq = gsap.utils.selector(card);
+  const stroke = card.querySelector<SVGPathElement>("[data-k-stroke]");
+  const nib = card.querySelector<SVGGElement>("[data-nib]");
+  const anchors = sq("[data-anchor]");
+  const handles = sq("[data-handle]");
+  const tl = gsap.timeline();
+  if (!stroke || !nib) return tl;
+
+  const length = stroke.getTotalLength();
+  const start = stroke.getPointAtLength(0);
+  const draw = { p: 0 };
+  const glide = 0.6;
+  const duration = 2.4;
+  const end = glide + duration;
+
+  tl.set(sq("[data-k-fill]"), { autoAlpha: 0 }, 0)
+    .set(stroke, { strokeDashoffset: 1 }, 0)
+    .set(sq("[data-select]"), { strokeDashoffset: 1 }, 0)
+    .set([...anchors, ...handles], { scale: 0, autoAlpha: 0 }, 0)
+    .fromTo(
+      sq("[data-swatch]"),
+      { scale: 0, autoAlpha: 0 },
+      { scale: 1, autoAlpha: 1, duration: 0.5, stagger: 0.08, ease: "back.out(2)" },
+      0
+    )
+    .fromTo(
+      nib,
+      { x: NIB_REST.x, y: NIB_REST.y },
+      { x: start.x, y: start.y, duration: glide, ease: "power3.inOut" },
+      0
+    )
+    .to(
+      draw,
+      {
+        p: 1,
+        duration,
+        ease: "none",
+        onUpdate: () => {
+          const point = stroke.getPointAtLength(draw.p * length);
+          gsap.set(stroke, { strokeDashoffset: 1 - draw.p });
+          gsap.set(nib, { x: point.x, y: point.y });
+        },
+      },
+      glide
+    );
+
+  anchors.forEach((anchor, i) => {
+    tl.fromTo(
+      anchor,
+      { scale: 0, autoAlpha: 0 },
+      { scale: 1, autoAlpha: 1, duration: 0.35, ease: "back.out(3)" },
+      glide + (K_FRACTIONS[i] ?? 0) * duration
+    );
+  });
+
+  tl.fromTo(
+    sq("[data-k-fill]"),
+    { autoAlpha: 0 },
+    { autoAlpha: 1, duration: 0.6, ease: "power2.out" },
+    end
+  )
+    .to(
+      sq("[data-select]"),
+      { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" },
+      end + 0.1
+    )
+    .to(
+      handles,
+      { scale: 1, autoAlpha: 1, duration: 0.4, stagger: 0.04, ease: "back.out(3)" },
+      end + 0.55
+    )
+    .to(
+      nib,
+      { x: NIB_REST.x, y: NIB_REST.y, duration: 0.9, ease: "power3.inOut" },
+      end + 0.3
+    );
+
+  return tl;
+}
+
 // Replays the draw-in of a card's scene
-function buildIntro(card: HTMLElement) {
+function buildIntro(card: HTMLElement, kind: AmbientKind) {
+  if (kind === "nib") return buildPenIntro(card);
+
   const sq = gsap.utils.selector(card);
   return gsap
     .timeline({ defaults: { ease: "power3.out" } })
@@ -110,21 +197,12 @@ function buildAmbient(card: HTMLElement, kind: AmbientKind) {
   const sq = gsap.utils.selector(card);
   const tl = gsap.timeline({ paused: true });
 
-  if (kind === "float") {
-    sq("[data-float]").forEach((el, i) => {
-      tl.to(
-        el,
-        {
-          y: i % 2 ? 10 : -10,
-          rotation: i % 2 ? -8 : 8,
-          duration: 2.2 + i * 0.5,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        },
-        0
-      );
-    });
+  if (kind === "nib") {
+    tl.to(
+      sq("[data-nib-hover]"),
+      { y: -7, x: 3, duration: 1.8, ease: "sine.inOut", yoyo: true, repeat: -1 },
+      0
+    );
   } else if (kind === "ball") {
     tl.fromTo(
       sq("[data-ball]"),
@@ -200,29 +278,95 @@ export default function Services() {
           );
       }
 
-      // 2. The cards wipe open one after another
+      // 2. The cards arrive. Desktop: they wipe open one after another.
+      //    Mobile and tablet: each slides in from alternating sides (left, right, left).
       const grid = section.querySelector<HTMLElement>("[data-grid]");
       const cards = gsap.utils.toArray<HTMLElement>("[data-card]", section);
 
       if (grid) {
-        gsap.fromTo(
-          cards,
-          { clipPath: "inset(100% 0% 0% 0% round 1.75rem)", autoAlpha: 0 },
-          {
-            clipPath: "inset(0% 0% 0% 0% round 1.75rem)",
-            autoAlpha: 1,
-            duration: d(1.2),
-            stagger: reduce ? 0 : 0.14,
-            ease: "expo.out",
-            clearProps: "clipPath",
-            scrollTrigger: { trigger: grid, start: "top 80%" },
-          }
-        );
+        if (reduce) {
+          gsap.set(cards, { autoAlpha: 1 });
+        } else {
+          mm.add("(min-width: 1024px)", () => {
+            gsap.fromTo(
+              cards,
+              { clipPath: "inset(100% 0% 0% 0% round 1.75rem)", autoAlpha: 0 },
+              {
+                clipPath: "inset(0% 0% 0% 0% round 1.75rem)",
+                autoAlpha: 1,
+                duration: 1.2,
+                stagger: 0.14,
+                ease: "expo.out",
+                clearProps: "clipPath",
+                scrollTrigger: { trigger: grid, start: "top 80%" },
+              }
+            );
+          });
+
+          mm.add("(max-width: 1023px)", () => {
+            cards.forEach((card, i) => {
+              const dir = i % 2 === 0 ? -1 : 1;
+              const top = card.querySelector("[data-card-top]");
+              const scene = card.querySelector("[data-card-scene]");
+              const text = card.querySelector("[data-card-text]");
+
+              const tl = gsap.timeline({
+                scrollTrigger: { trigger: card, start: "top 85%" },
+              });
+
+              tl.fromTo(
+                card,
+                {
+                  xPercent: dir * 80,
+                  rotation: dir * 4,
+                  scale: 0.94,
+                  autoAlpha: 0,
+                  transformOrigin: "50% 100%",
+                },
+                {
+                  xPercent: 0,
+                  rotation: 0,
+                  scale: 1,
+                  autoAlpha: 1,
+                  duration: 1.3,
+                  ease: "power4.out",
+                  clearProps: "transform",
+                },
+                0
+              );
+
+              if (scene) {
+                tl.fromTo(
+                  scene,
+                  { x: -dir * 50 },
+                  { x: 0, duration: 1.4, ease: "power4.out" },
+                  0.1
+                );
+              }
+              if (top) {
+                tl.fromTo(
+                  top,
+                  { y: -16, autoAlpha: 0 },
+                  { y: 0, autoAlpha: 1, duration: 0.7, ease: "power3.out" },
+                  0.35
+                );
+              }
+              if (text) {
+                tl.fromTo(
+                  text,
+                  { y: 28, autoAlpha: 0 },
+                  { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
+                  0.55
+                );
+              }
+            });
+          });
+        }
       }
 
       // 3. Scene controller: the draw-in replays, then the loop runs
       scenes = cards.map((card) => {
-        const kind = (card.dataset.ambient ?? "float") as AmbientKind;
+        const kind = (card.dataset.ambient ?? "ball") as AmbientKind;
         return {
           card,
           kind,
@@ -235,12 +379,25 @@ export default function Services() {
         play: (i) => {
           const scene = scenes[i];
           if (reduce || !scene) return;
-          scene.intro?.kill();
-          scene.intro = buildIntro(scene.card);
-          scene.ambient?.play();
+
+          // A scene that is replaced always finishes first, so none is left half-drawn
+          scene.intro?.progress(1).kill();
+          const intro = buildIntro(scene.card, scene.kind);
+          scene.intro = intro;
+
+          if (scene.kind === "nib") {
+            // The pen only hovers once it has finished drawing
+            scene.ambient?.pause(0);
+            intro.eventCallback("onComplete", () => scene.ambient?.play());
+          } else {
+            scene.ambient?.play();
+          }
         },
         pause: (i) => {
-          scenes[i]?.ambient?.pause();
+          const scene = scenes[i];
+          if (!scene) return;
+          scene.intro?.progress(1);
+          scene.ambient?.pause();
         },
         activate: (i) => {
           scenes.forEach((_, n) => (n === i ? api.play(n) : api.pause(n)));
@@ -272,7 +429,7 @@ export default function Services() {
           const triggers = scenes.map((scene, i) =>
             ScrollTrigger.create({
               trigger: scene.card,
-              start: "top 75%",
+              start: "top 65%",
               end: "bottom 25%",
               onEnter: () => api.play(i),
               onEnterBack: () => api.play(i),
@@ -341,7 +498,7 @@ export default function Services() {
       ref={sectionRef}
       id="services"
       aria-labelledby="services-heading"
-      className="relative px-4 pb-24 sm:px-6 sm:pb-32 lg:px-10 lg:pb-40"
+      className="relative overflow-x-clip px-4 pb-24 sm:px-6 sm:pb-32 lg:px-10 lg:pb-40"
     >
       <div className="mx-auto max-w-7xl">
         <div className="relative rounded-[2rem] bg-graphite p-4 sm:rounded-[2.5rem] sm:p-6 sm:pl-12 lg:p-10 lg:pl-16">
@@ -430,7 +587,7 @@ export default function Services() {
                     isActive ? "lg:flex-[2.6] lg:border-volt/50" : "lg:flex-1"
                   }`}
                 >
-                  <div className="flex items-start justify-between">
+                  <div data-card-top className="flex items-start justify-between">
                     <span
                       className={`text-sm font-medium tabular-nums transition-colors duration-500 ${
                         isActive ? "text-white/50 lg:text-volt" : "text-white/50"
@@ -449,15 +606,16 @@ export default function Services() {
                   </div>
 
                   <div
+                    data-card-scene
                     aria-hidden="true"
-                    className={`pointer-events-none absolute inset-x-0 bottom-[38%] top-[13%] flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    className={`pointer-events-none absolute inset-x-0 bottom-[38%] top-[13%] flex items-center justify-center lg:transition-transform lg:duration-700 lg:ease-[cubic-bezier(0.22,1,0.36,1)] ${
                       isActive ? "lg:scale-100" : "lg:scale-[0.6]"
                     }`}
                   >
                     <service.Scene className="aspect-[3/2] h-full max-w-none shrink-0" />
                   </div>
 
-                  <div>
+                  <div data-card-text>
                     <h3 className="text-[1.75rem] font-semibold leading-tight tracking-tight lg:text-[2rem]">
                       <Link
                         href={`/projects?category=${service.id}`}

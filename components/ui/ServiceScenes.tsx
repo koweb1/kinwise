@@ -6,69 +6,133 @@ const POP = { "data-pop": "" };
 
 const TICKS = Array.from({ length: 11 }, (_, i) => `M${40 + i * 40} 54V64`).join("");
 
-/* Graphic design: a pen-tool curve with anchors and handles */
+/* ---------- Graphic design: a pen tool drawing a K ---------- */
+
+const K_POINTS: [number, number][] = [
+  [170, 60],
+  [215, 60],
+  [215, 140],
+  [277, 60],
+  [331, 60],
+  [254, 164],
+  [335, 260],
+  [279, 260],
+  [215, 190],
+  [215, 260],
+  [170, 260],
+];
+
+const K_PATH = `M${K_POINTS.map(([x, y]) => `${x} ${y}`).join(" L")} Z`;
+
+// Where each anchor sits along the path (0 to 1), so anchors can pop as the pen passes them
+const K_SEGMENTS = K_POINTS.map(([x, y], i) => {
+  const [nx, ny] = K_POINTS[(i + 1) % K_POINTS.length];
+  return Math.hypot(nx - x, ny - y);
+});
+const K_TOTAL = K_SEGMENTS.reduce((sum, length) => sum + length, 0);
+export const K_FRACTIONS = K_POINTS.map(
+  (_, i) => K_SEGMENTS.slice(0, i).reduce((sum, length) => sum + length, 0) / K_TOTAL
+);
+
+export const NIB_REST = { x: 392, y: 262 };
+
+const SELECT_HANDLES: [number, number][] = [
+  [152, 42],
+  [252, 42],
+  [352, 42],
+  [352, 160],
+  [352, 278],
+  [252, 278],
+  [152, 278],
+  [152, 160],
+];
+
 export function GraphicScene({ className }: SceneProps) {
   return (
     <svg viewBox="0 0 480 320" fill="none" aria-hidden="true" className={className}>
-      <g className="stroke-white/30" strokeWidth="1.5" strokeLinecap="round">
-        <path {...DRAW} d="M60 240 L110 70" />
-        <path {...DRAW} d="M230 70 L260 165 L290 260" />
-        <path {...DRAW} d="M380 280 L430 100" />
-      </g>
+      {/* The K, filled in once the path closes */}
+      <path data-k-fill="" d={K_PATH} className="fill-volt" />
 
+      {/* The path the pen draws */}
       <path
-        {...DRAW}
-        d="M60 240 C110 70 230 70 260 165 S380 280 430 100"
+        data-k-stroke=""
+        pathLength={1}
+        strokeDasharray="1 2"
+        d={K_PATH}
         className="stroke-volt"
-        strokeWidth="4"
-        strokeLinecap="round"
+        strokeWidth="3"
+        strokeLinejoin="round"
       />
 
-      <g className="fill-ink stroke-white/70" strokeWidth="1.5">
-        <circle {...POP} cx="110" cy="70" r="5" />
-        <circle {...POP} cx="230" cy="70" r="5" />
-        <circle {...POP} cx="290" cy="260" r="5" />
-        <circle {...POP} cx="380" cy="280" r="5" />
-      </g>
-
-      <g className="fill-volt">
-        <rect {...POP} x="54" y="234" width="12" height="12" rx="2" />
-        <rect {...POP} x="254" y="159" width="12" height="12" rx="2" />
-        <rect {...POP} x="424" y="94" width="12" height="12" rx="2" />
-      </g>
-
-      <circle
-        {...POP}
-        data-float=""
-        cx="60"
-        cy="60"
-        r="22"
-        className="stroke-white/35"
-        strokeWidth="1.5"
-      />
+      {/* Selection box and handles */}
       <path
-        {...POP}
-        data-float=""
-        d="M410 245 L430 265 L410 285 L390 265 Z"
-        className="fill-volt/15 stroke-volt/60"
+        data-select=""
+        pathLength={1}
+        strokeDasharray="1 2"
+        d="M152 42 H352 V278 H152 Z"
+        className="stroke-white/60"
         strokeWidth="1.5"
       />
-      <rect
-        {...POP}
-        data-float=""
-        x="330"
-        y="24"
-        width="40"
-        height="40"
-        rx="10"
-        className="stroke-white/30"
+      {SELECT_HANDLES.map(([x, y]) => (
+        <rect
+          key={`${x}-${y}`}
+          data-handle=""
+          x={x - 4.5}
+          y={y - 4.5}
+          width="9"
+          height="9"
+          className="fill-white stroke-ink"
+          strokeWidth="1"
+        />
+      ))}
+
+      {/* Anchor points */}
+      {K_POINTS.map(([x, y]) => (
+        <rect
+          key={`${x}-${y}`}
+          data-anchor=""
+          x={x - 4}
+          y={y - 4}
+          width="8"
+          height="8"
+          className="fill-ink stroke-white"
+          strokeWidth="1.5"
+        />
+      ))}
+
+      {/* Color swatches */}
+      <circle data-swatch="" cx="60" cy="288" r="9" className="fill-volt" />
+      <circle data-swatch="" cx="86" cy="288" r="9" className="fill-white" />
+      <circle
+        data-swatch=""
+        cx="112"
+        cy="288"
+        r="9"
+        className="stroke-white/40"
         strokeWidth="1.5"
       />
+
+      {/* The pen nib */}
+      <g data-nib="" transform={`translate(${NIB_REST.x} ${NIB_REST.y})`}>
+        <g data-nib-hover="">
+          <g transform="rotate(30) scale(0.9)">
+            <rect x="-9" y="-124" width="18" height="52" rx="5" className="fill-white/25" />
+            <rect x="-13" y="-78" width="26" height="12" rx="3" className="fill-white/60" />
+            <path
+              d="M0 0 L-15 -38 C-17 -47 -15 -57 -10 -66 H10 C15 -57 17 -47 15 -38 Z"
+              className="fill-white"
+            />
+            <circle cx="0" cy="-38" r="4" className="fill-ink" />
+            <path d="M0 -34 V-4" className="stroke-ink" strokeWidth="1.8" strokeLinecap="round" />
+          </g>
+        </g>
+      </g>
     </svg>
   );
 }
 
-/* Motion design: an easing curve, keyframes and a ball on a track */
+/* ---------- Motion design: an easing curve, keyframes and a ball on a track ---------- */
+
 export function MotionScene({ className }: SceneProps) {
   return (
     <svg viewBox="0 0 480 320" fill="none" aria-hidden="true" className={className}>
@@ -116,7 +180,8 @@ export function MotionScene({ className }: SceneProps) {
   );
 }
 
-/* Video editing: a timeline with clips and a moving playhead */
+/* ---------- Video editing: a timeline with clips and a moving playhead ---------- */
+
 export function VideoScene({ className }: SceneProps) {
   return (
     <svg viewBox="0 0 480 320" fill="none" aria-hidden="true" className={className}>
