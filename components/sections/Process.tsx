@@ -14,12 +14,32 @@ const HEADING = [
   { text: "impact.", marker: true },
 ];
 
+const INTRO = "Every great visual starts with an idea. Here’s how I bring yours to life.";
+
 const STEPS = [
-  { number: "01", title: "Discover", description: "Understanding the idea and the vision." },
-  { number: "02", title: "Create", description: "Turning concepts into visual experiences." },
-  { number: "03", title: "Refine", description: "Perfecting the details." },
-  { number: "04", title: "Deliver", description: "Bringing the final vision to life." },
+  {
+    number: "01",
+    title: "Discover",
+    description: "We discuss your vision, goals and what you want to communicate.",
+  },
+  {
+    number: "02",
+    title: "Create",
+    description: "I develop concepts and turn your ideas into compelling visuals.",
+  },
+  {
+    number: "03",
+    title: "Refine",
+    description: "We review the work, make adjustments and perfect the details.",
+  },
+  {
+    number: "04",
+    title: "Deliver",
+    description: "Your finished project, polished and ready to make an impact.",
+  },
 ];
+
+const CLOSING = ["Good ideas.", "Thoughtful execution."];
 
 const BURST_COUNT = 8;
 
@@ -37,13 +57,14 @@ export default function Process() {
       const q = gsap.utils.selector(section);
 
       const steps = gsap.utils.toArray<HTMLElement>("[data-step]", section);
+      const indexItems = gsap.utils.toArray<HTMLElement>("[data-index-item]", section);
       const list = section.querySelector<HTMLElement>("[data-list]");
       const progress = section.querySelector<HTMLElement>("[data-progress]");
       const dot = section.querySelector<HTMLElement>("[data-dot]");
-      const counter = section.querySelector<HTMLElement>("[data-counter]");
       const marker = section.querySelector<HTMLElement>("[data-marker]");
+      const closing = section.querySelector<HTMLElement>("[data-closing]");
 
-      // 1. Label, heading and marker
+      // 1. Label, heading, marker, intro line and step index
       const intro = section.querySelector("[data-intro]");
       if (intro) {
         gsap
@@ -71,7 +92,13 @@ export default function Process() {
             "-=0.35"
           )
           .fromTo(
-            q("[data-counter-wrap]"),
+            q("[data-intro-text]"),
+            { y: 24, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: d(0.8) },
+            "-=0.5"
+          )
+          .fromTo(
+            q("[data-index-list]"),
             { y: 24, autoAlpha: 0 },
             { y: 0, autoAlpha: 1, duration: d(0.8) },
             "-=0.5"
@@ -108,12 +135,28 @@ export default function Process() {
           );
       });
 
+      // 2b. The closing line rises through a mask, one line after the other
+      if (closing) {
+        gsap.fromTo(
+          q("[data-closing-line]"),
+          { yPercent: 110, autoAlpha: 0 },
+          {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: d(1),
+            stagger: reduce ? 0 : 0.12,
+            ease: "power4.out",
+            scrollTrigger: { trigger: closing, start: "top 90%" },
+          }
+        );
+      }
+
       // 3. Reduced motion: everything lit, line full, no scrubbing
       if (reduce) {
         steps.forEach((step) => step.setAttribute("data-active", "true"));
+        indexItems.forEach((item) => item.setAttribute("data-active", "true"));
         if (progress) gsap.set(progress, { scaleY: 1 });
         if (dot) gsap.set(dot, { autoAlpha: 0 });
-        if (counter) gsap.set(counter, { yPercent: -75 });
         return;
       }
 
@@ -148,22 +191,15 @@ export default function Process() {
         );
       }
 
-      // 5. Which step is lit, and the counter that follows it
+      // 5. Which step is lit, and the small index that follows it
       let current = -1;
       const setActive = (index: number) => {
         if (index === current) return;
         current = index;
 
         steps.forEach((step, n) => step.setAttribute("data-active", String(n === index)));
+        indexItems.forEach((item, n) => item.setAttribute("data-active", String(n === index)));
 
-        if (counter) {
-          gsap.to(counter, {
-            yPercent: -(100 / steps.length) * index,
-            duration: 0.7,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        }
         if (index === steps.length - 1) burst.restart();
       };
 
@@ -213,9 +249,9 @@ export default function Process() {
       aria-labelledby="process-heading"
       className="relative overflow-x-clip px-4 pb-24 pt-8 sm:px-6 sm:pb-32 lg:px-10 lg:pb-40"
     >
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-12 lg:gap-10">
-        {/* Heading and counter (pinned on desktop) */}
-        <div className="lg:col-span-5">
+      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-x-12 xl:grid-cols-[19rem_minmax(0,1fr)] xl:gap-x-16">
+        {/* Heading, intro and step index (a narrow caption column, pinned on desktop) */}
+        <div>
           <div className="lg:sticky lg:top-32">
             <div data-intro>
               <p className="flex items-center gap-3 text-sm text-white/70">
@@ -227,7 +263,7 @@ export default function Process() {
 
               <h2
                 id="process-heading"
-                className="mt-5 text-[clamp(2.5rem,6.4vw,4.75rem)] font-semibold leading-[1.04] tracking-tight [word-spacing:0.08em] lg:text-[clamp(2.75rem,4.4vw,4.25rem)]"
+                className="mt-5 text-[clamp(2.5rem,6.4vw,4.75rem)] font-semibold leading-[1.04] tracking-tight [word-spacing:0.08em] lg:text-[clamp(2.25rem,3.2vw,2.75rem)]"
               >
                 {HEADING.map((item, i) => (
                   <Fragment key={i}>
@@ -251,29 +287,41 @@ export default function Process() {
                   </Fragment>
                 ))}
               </h2>
+
+              <p
+                data-intro-text
+                className="invisible mt-6 max-w-sm text-base leading-relaxed text-white/70"
+              >
+                {INTRO}
+              </p>
             </div>
 
-            <div
-              data-counter-wrap
+            {/* Small step index: shows where you are without competing with the steps */}
+            <ul
+              data-index-list
               aria-hidden="true"
-              className="invisible mt-12 hidden items-end gap-3 lg:flex"
+              className="invisible mt-10 hidden space-y-3 lg:block"
             >
-              <div className="h-[1em] overflow-hidden text-[5.5rem] font-semibold leading-none tracking-tight tabular-nums text-volt">
-                <div data-counter className="will-change-transform">
-                  {STEPS.map((step) => (
-                    <span key={step.number} className="block h-[1em]">
-                      {step.number}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <span className="pb-2 text-xl text-white/50">/ 04</span>
-            </div>
+              {STEPS.map((step) => (
+                <li
+                  key={step.number}
+                  data-index-item
+                  data-active="false"
+                  className="group flex items-center gap-3 text-sm text-white/40 transition-colors duration-500 data-[active=true]:text-white"
+                >
+                  <span className="w-6 tabular-nums transition-colors duration-500 group-data-[active=true]:text-volt">
+                    {step.number}
+                  </span>
+                  <span className="h-px w-3 bg-current transition-all duration-500 group-data-[active=true]:w-10 group-data-[active=true]:bg-volt" />
+                  <span>{step.title}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* Steps */}
-        <div className="lg:col-span-7">
+        <div>
           <div data-list className="relative pl-8 sm:pl-12 lg:pl-14">
             <span aria-hidden="true" className="absolute left-0 top-0 h-full w-[2px] bg-white/15" />
             <span
@@ -340,6 +388,20 @@ export default function Process() {
               ))}
             </ol>
           </div>
+
+          {/* Closing line */}
+          <p
+            data-closing
+            className="mt-10 pl-8 text-[clamp(1.5rem,3.4vw,2.75rem)] font-semibold uppercase leading-[1.1] tracking-tight sm:pl-12 lg:mt-14 lg:pl-14"
+          >
+            {CLOSING.map((line, i) => (
+              <span key={line} className="block overflow-hidden pb-[0.1em]">
+                <span data-closing-line className={`invisible block ${i === 1 ? "text-volt" : ""}`}>
+                  {line}
+                </span>
+              </span>
+            ))}
+          </p>
         </div>
       </div>
     </section>
