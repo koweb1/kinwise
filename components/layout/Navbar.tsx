@@ -274,7 +274,7 @@ export default function Navbar() {
       <div
         ref={menuRef}
         id="mobile-menu"
-        className="fixed inset-0 z-40 flex flex-col justify-between bg-ink bg-[radial-gradient(circle_at_85%_105%,rgba(217,254,27,0.16),transparent_55%)] px-6 pb-10 pt-28 lg:hidden"
+        className="invisible fixed inset-0 z-40 flex flex-col justify-between bg-ink bg-[radial-gradient(circle_at_85%_105%,rgba(217,254,27,0.16),transparent_55%)] px-6 pb-10 pt-28 lg:hidden"
       >
         <ul className="flex flex-col gap-1">
           {MOBILE_LINKS.map((link) => (
