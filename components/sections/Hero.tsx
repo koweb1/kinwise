@@ -331,11 +331,11 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Rotating "work together" badge (tablet and up) */}
+        {/* Rotating "work together" badge (tablet and up): glides to the Contact section */}
         <Link
-          href="/contact"
+          href="/#contact"
           data-badge
-          aria-label="Let’s work together, go to the contact page"
+          aria-label="Let’s work together, go to the contact section"
           className={`group invisible absolute right-[4%] top-[42%] z-10 hidden size-28 place-items-center rounded-full bg-ink text-volt md:grid lg:right-[7%] lg:size-36 ${FOCUS_ON_LIGHT}`}
         >
           <svg viewBox="0 0 200 200" className="absolute inset-0 size-full" aria-hidden="true">
@@ -365,13 +365,13 @@ export default function Hero() {
         >
           <div className="flex items-center gap-1 rounded-full bg-ink/90 p-1.5 backdrop-blur-md">
             <Link
-              href="/projects"
+              href="/#works"
               className={`rounded-full bg-volt px-3.5 py-3 text-xs font-medium text-ink transition-transform duration-300 hover:scale-[1.04] sm:px-5 sm:text-[13px] ${FOCUS_ON_DARK}`}
             >
               Explore My Work
             </Link>
             <Link
-              href="/contact"
+              href="/#contact"
               className={`rounded-full px-3.5 py-3 text-xs font-medium text-white transition-colors duration-300 hover:text-volt sm:px-5 sm:text-[13px] ${FOCUS_ON_DARK}`}
             >
               Let’s Work Together

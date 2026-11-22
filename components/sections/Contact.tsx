@@ -4,7 +4,7 @@ import { Fragment, useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { FaBehance, FaInstagram, FaTiktok, FaWhatsapp } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from "react-icons/fa";
 import { FiArrowUp, FiMail } from "react-icons/fi";
 import ContactForm from "@/components/ui/ContactForm";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
@@ -27,7 +27,7 @@ const WORDMARK = "KINWISE".split("");
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   Instagram: <FaInstagram />,
   TikTok: <FaTiktok />,
-  Behance: <FaBehance />,
+  Facebook: <FaFacebookF />,
 };
 
 const FOCUS_INK =

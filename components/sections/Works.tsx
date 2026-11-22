@@ -343,15 +343,7 @@ export default function Works() {
             <p className="max-w-xs text-base leading-relaxed text-white/70 lg:text-right">
               Different ideas. Different challenges. One creative approach.
             </p>
-            <Link
-              href="/projects"
-              className={`group inline-flex items-center gap-3 rounded-full border border-volt/60 py-1.5 pl-6 pr-1.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-volt hover:text-ink ${FOCUS}`}
-            >
-              View all projects
-              <span className="grid size-10 place-items-center rounded-full bg-volt text-ink transition-colors duration-300 group-hover:bg-ink group-hover:text-volt">
-                <FiArrowUpRight aria-hidden="true" />
-              </span>
-            </Link>
+
           </div>
         </div>
 

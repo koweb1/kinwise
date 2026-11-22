@@ -558,7 +558,7 @@ export default function Services() {
                 Three disciplines, one creative approach.
               </p>
               <Link
-                href="/projects"
+                href="/#works"
                 className={`group inline-flex items-center gap-3 rounded-full border border-volt/60 py-1.5 pl-6 pr-1.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-volt hover:text-ink ${FOCUS}`}
               >
                 View my work

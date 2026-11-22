@@ -14,7 +14,10 @@ type NavLink = { id: string; label: string; href: string };
 
 const AVATAR_SRC = "/avatar.png";
 const SCROLL_OFFSET = 96;
-const SECTION_IDS = ["about", "services"];
+
+// In page order. "process" has no link of its own, but it is listed so that
+// Services does not stay lit while you are reading the Process section.
+const SECTION_IDS = ["about", "services", "process", "works", "contact"];
 
 const LEFT_LINKS: NavLink[] = [
   { id: "home", label: "Home", href: "/" },
@@ -22,9 +25,7 @@ const LEFT_LINKS: NavLink[] = [
   { id: "services", label: "Services", href: "/#services" },
 ];
 
-const RIGHT_LINKS: NavLink[] = [
-  { id: "projects", label: "Projects", href: "/projects" },
-];
+const RIGHT_LINKS: NavLink[] = [{ id: "works", label: "Projects", href: "/#works" }];
 
 const MOBILE_LINKS = [...LEFT_LINKS, ...RIGHT_LINKS];
 
@@ -157,7 +158,8 @@ export default function Navbar() {
   }, [pathname]);
 
   const isActive = (link: NavLink) => {
-    if (link.id === "projects") return pathname.startsWith("/projects");
+    // On the standalone Projects page, the Projects link is the lit one
+    if (pathname.startsWith("/projects")) return link.id === "works";
     if (pathname === "/") return activeSection === link.id;
     return false;
   };
@@ -243,7 +245,7 @@ export default function Navbar() {
             <div className="flex items-center justify-end gap-8">
               {RIGHT_LINKS.map(renderLink)}
               <Link
-                href="/contact"
+                href="/#contact"
                 className={`rounded-full bg-volt px-[18px] py-2.5 text-[13px] font-medium text-ink transition-transform duration-300 hover:scale-[1.04] ${FOCUS}`}
               >
                 Contact me
@@ -292,7 +294,7 @@ export default function Navbar() {
 
         <div data-menu-item>
           <Link
-            href="/contact"
+            href="/#contact"
             onClick={() => setMenuOpen(false)}
             className={`inline-flex items-center gap-2 rounded-full bg-volt px-7 py-4 text-base font-medium text-ink ${FOCUS}`}
           >

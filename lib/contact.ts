@@ -21,11 +21,10 @@ export const BUDGET_OPTIONS = [
   "₦1,500,000+",
 ] as const;
 
-// Placeholder links: replace them with his real profiles
 export const SOCIALS = [
-  { label: "Instagram", href: "https://www.instagram.com/" },
-  { label: "TikTok", href: "https://www.tiktok.com/" },
-  { label: "Behance", href: "https://www.behance.net/" },
+  { label: "Instagram", href: "https://www.instagram.com/kinwise.editz/" },
+  { label: "TikTok", href: "https://www.tiktok.com/@kinwise.1" },
+  { label: "Facebook", href: "https://www.facebook.com/share/19wxrvroSH/" },
 ];
 
 export const serviceLabel = (id: string) =>
