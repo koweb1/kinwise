@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
+import SmoothHashScroll from "@/components/ui/SmoothHashScroll";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className={poppins.variable}>
       <body>
         <Navbar />
+        <SmoothHashScroll />
         <main>{children}</main>
       </body>
     </html>
